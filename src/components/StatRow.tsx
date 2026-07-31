@@ -10,7 +10,7 @@ export function StatRow({ entry }: { entry: StatEntry }) {
           {entry.rank}
         </p>
         <div className="relative size-10 shrink-0 overflow-hidden rounded-full border border-[#e9eaeb] sm:size-11">
-          <Image src="/design/avatar.png" alt="" fill sizes="44px" className="object-cover" />
+          <Image src={entry.avatarSrc ?? "/design/avatar.png"} alt="" fill sizes="44px" className="object-cover" />
         </div>
         <div className="min-w-0">
           <p className="truncate font-[family-name:var(--font-inter)] text-[15px] font-medium text-[#e9eaeb] sm:text-[17px]">

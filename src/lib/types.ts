@@ -1,9 +1,13 @@
 export type BadgeVariant = "gold" | "silver" | "bronze" | "plain";
 
-export type StatEntry = {
-  rank: number;
+export type Person = {
   name: string;
   activity: string;
-  badge: BadgeVariant;
   value: number;
+  avatarSrc?: string;
+};
+
+export type StatEntry = Person & {
+  rank: number;
+  badge: BadgeVariant;
 };
