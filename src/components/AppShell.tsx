@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CHALLENGE_START } from "@/lib/challenge";
 import { SEED_LOGGED, SEED_NOT_LOGGED } from "@/lib/data";
+import { dateKey } from "@/lib/date";
 import { buildLeaderboard } from "@/lib/leaderboard";
 import { isLoggedOn, loadProfile, todayKey, type Profile } from "@/lib/profile";
 import type { Person } from "@/lib/types";
@@ -15,7 +17,10 @@ import { StatSection } from "./StatSection";
 export function AppShell() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+    return dateKey(today) < dateKey(CHALLENGE_START) ? CHALLENGE_START : today;
+  });
 
   useEffect(() => {
     setProfile(loadProfile());
@@ -45,6 +50,7 @@ export function AppShell() {
         selected={selectedDate}
         onSelectedChange={setSelectedDate}
         isLogged={(date) => !!profile && isLoggedOn(profile, date)}
+        minDate={CHALLENGE_START}
       />
 
       <div className="flex w-full flex-col items-center gap-[25px]">
