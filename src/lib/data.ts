@@ -12,10 +12,3 @@ export const SEED_NOT_LOGGED: Person[] = [
   { name: "Dishank", activity: "Writing Movie Summaries", value: 0 },
   { name: "Dishank", activity: "Writing Movie Summaries", value: 0 },
 ];
-
-// true = day logged (streak dot filled)
-export const CHALLENGE_LENGTH = 21;
-export const CHALLENGE_PROGRESS: boolean[] = [
-  false, true, true, true, true, true, false, true,
-  ...Array(CHALLENGE_LENGTH - 8).fill(false),
-];

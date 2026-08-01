@@ -50,7 +50,7 @@ export function AppShell() {
       <div className="flex w-full flex-col items-center gap-[25px]">
         <LogGoalButton onClick={() => setModalOpen(true)} />
 
-        <ChallengeProgress title="Rish’s 21 days challenge" />
+        <ChallengeProgress title="Rish’s 21 days challenge" loggedDates={profile?.loggedDates ?? []} />
 
         <StatSection title="Logged" entries={logged} />
 
