@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { SEED_LOGGED, SEED_NOT_LOGGED } from "@/lib/data";
 import { buildLeaderboard } from "@/lib/leaderboard";
-import { loadProfile, todayKey, type Profile } from "@/lib/profile";
+import { isLoggedOn, loadProfile, todayKey, type Profile } from "@/lib/profile";
 import type { Person } from "@/lib/types";
 import { ChallengeProgress } from "./ChallengeProgress";
 import { DateStrip } from "./DateStrip";
@@ -15,15 +15,21 @@ import { StatSection } from "./StatSection";
 export function AppShell() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
 
   useEffect(() => {
     setProfile(loadProfile());
   }, []);
 
-  const loggedToday = !!profile && profile.lastLoggedDate === todayKey();
+  const loggedToday = !!profile && profile.loggedDates.includes(todayKey());
 
   const you: Person | null = profile
-    ? { name: "You", activity: profile.goal, value: profile.streak, avatarSrc: profile.avatarDataUrl ?? undefined }
+    ? {
+        name: "You",
+        activity: profile.goal,
+        value: profile.loggedDates.length,
+        avatarSrc: profile.avatarDataUrl ?? undefined,
+      }
     : null;
 
   const loggedPeople = [...SEED_LOGGED, ...(you && loggedToday ? [you] : [])];
@@ -35,7 +41,11 @@ export function AppShell() {
     <>
       <Logo />
 
-      <DateStrip />
+      <DateStrip
+        selected={selectedDate}
+        onSelectedChange={setSelectedDate}
+        isLogged={(date) => !!profile && isLoggedOn(profile, date)}
+      />
 
       <div className="flex w-full flex-col items-center gap-[25px]">
         <LogGoalButton onClick={() => setModalOpen(true)} />
@@ -51,6 +61,7 @@ export function AppShell() {
         <LogGoalModal
           profile={profile}
           youEntry={youEntry}
+          date={selectedDate}
           onClose={() => setModalOpen(false)}
           onSaved={(next) => {
             setProfile(next);

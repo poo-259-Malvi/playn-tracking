@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import type { StatEntry } from "@/lib/types";
-import { saveProfile, todayKey, type Profile } from "@/lib/profile";
+import { dateKey, formatOrdinalDate, isSameDay } from "@/lib/date";
+import { isLoggedOn, saveProfile, withLoggedDate, type Profile } from "@/lib/profile";
 import { RankBadge } from "./RankBadge";
 
 const fieldClass =
@@ -18,11 +19,13 @@ const actionLabelClass =
 export function LogGoalModal({
   profile,
   youEntry,
+  date,
   onClose,
   onSaved,
 }: {
   profile: Profile | null;
   youEntry: StatEntry | null;
+  date: Date;
   onClose: () => void;
   onSaved: (profile: Profile) => void;
 }) {
@@ -61,23 +64,21 @@ export function LogGoalModal({
       name: name.trim(),
       goal: goal.trim(),
       avatarDataUrl,
-      streak: 1,
-      lastLoggedDate: todayKey(),
+      loggedDates: [dateKey(date)],
     };
     saveProfile(next);
     onSaved(next);
   }
 
-  function handleDoneForToday() {
+  function handleLogDate() {
     if (!profile) return;
-    const today = todayKey();
-    const next: Profile =
-      profile.lastLoggedDate === today
-        ? profile
-        : { ...profile, streak: profile.streak + 1, lastLoggedDate: today };
+    const next = withLoggedDate(profile, date);
     saveProfile(next);
     onSaved(next);
   }
+
+  const alreadyLogged = !!profile && isLoggedOn(profile, date);
+  const dateLabel = isSameDay(date, new Date()) ? "today" : formatOrdinalDate(date);
 
   return (
     <div
@@ -120,9 +121,14 @@ export function LogGoalModal({
               {youEntry && <RankBadge variant={youEntry.badge} value={youEntry.value} />}
             </div>
 
-            <button type="button" onClick={handleDoneForToday} className={actionButtonClass}>
+            <button
+              type="button"
+              onClick={handleLogDate}
+              disabled={alreadyLogged}
+              className={actionButtonClass + (alreadyLogged ? " cursor-default opacity-60 hover:bg-white/10" : "")}
+            >
               <Image src="/design/check.svg" alt="" width={18} height={13} />
-              <span className={actionLabelClass}>Done for today</span>
+              <span className={actionLabelClass}>{alreadyLogged ? `Logged for ${dateLabel}` : `Done for ${dateLabel}`}</span>
             </button>
           </>
         ) : (
