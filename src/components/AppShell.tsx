@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CHALLENGE_START } from "@/lib/challenge";
+import { CHALLENGE_END, CHALLENGE_START } from "@/lib/challenge";
 import { SEED_LOGGED, SEED_NOT_LOGGED } from "@/lib/data";
 import { dateKey } from "@/lib/date";
 import { buildLeaderboard } from "@/lib/leaderboard";
@@ -19,7 +19,9 @@ export function AppShell() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(() => {
     const today = new Date();
-    return dateKey(today) < dateKey(CHALLENGE_START) ? CHALLENGE_START : today;
+    if (dateKey(today) < dateKey(CHALLENGE_START)) return CHALLENGE_START;
+    if (dateKey(today) > dateKey(CHALLENGE_END)) return CHALLENGE_END;
+    return today;
   });
 
   useEffect(() => {
@@ -51,6 +53,7 @@ export function AppShell() {
         onSelectedChange={setSelectedDate}
         isLogged={(date) => !!profile && isLoggedOn(profile, date)}
         minDate={CHALLENGE_START}
+        maxDate={CHALLENGE_END}
       />
 
       <div className="flex w-full flex-col items-center gap-[25px]">

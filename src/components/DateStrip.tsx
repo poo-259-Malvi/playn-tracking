@@ -46,15 +46,18 @@ export function DateStrip({
   onSelectedChange,
   isLogged,
   minDate,
+  maxDate,
 }: {
   selected: Date;
   onSelectedChange: (date: Date) => void;
   isLogged: (date: Date) => boolean;
   minDate?: Date;
+  maxDate?: Date;
 }) {
   const prev = addDays(selected, -1);
   const next = addDays(selected, 1);
   const canGoPrev = !minDate || dateKey(selected) > dateKey(minDate);
+  const canGoNext = !maxDate || dateKey(selected) < dateKey(maxDate);
 
   return (
     <div className="flex items-center justify-center gap-2 sm:gap-4">
@@ -78,8 +81,12 @@ export function DateStrip({
       <button
         type="button"
         aria-label="Next day"
-        onClick={() => onSelectedChange(addDays(selected, 1))}
-        className="flex size-11 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/10 transition-colors hover:bg-white/15 sm:size-14"
+        onClick={() => canGoNext && onSelectedChange(addDays(selected, 1))}
+        disabled={!canGoNext}
+        className={
+          "flex size-11 shrink-0 items-center justify-center rounded-full border border-white/12 bg-white/10 transition-colors sm:size-14 " +
+          (canGoNext ? "hover:bg-white/15" : "cursor-not-allowed opacity-40")
+        }
       >
         <Image src="/design/arrow-right.svg" alt="" width={16} height={16} />
       </button>
