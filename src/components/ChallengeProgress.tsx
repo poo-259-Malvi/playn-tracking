@@ -1,14 +1,24 @@
 import { challengeDates } from "@/lib/challenge";
 import { dateKey } from "@/lib/date";
 
-export function ChallengeProgress({ title, loggedDates }: { title: string; loggedDates: string[] }) {
+export function ChallengeProgress({
+  title,
+  loggedDates,
+  startDate,
+  endDate,
+}: {
+  title: string;
+  loggedDates: string[];
+  startDate: Date;
+  endDate: Date;
+}) {
   return (
     <section className="flex w-full flex-col items-center gap-[14px]">
       <h2 className="w-full font-[family-name:var(--font-inter-tight)] text-[16px] font-semibold tracking-[4.5px] text-white uppercase sm:text-[18px]">
         {title}
       </h2>
       <div className="flex w-full flex-wrap items-center gap-2">
-        {challengeDates().map((date) => {
+        {challengeDates(startDate, endDate).map((date) => {
           const key = dateKey(date);
           const done = loggedDates.includes(key);
           return (

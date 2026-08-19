@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import type { StatEntry } from "@/lib/types";
-import { dateKey, formatOrdinalDate, isSameDay } from "@/lib/date";
-import { isLoggedOn, saveProfile, withLoggedDate, type Profile } from "@/lib/profile";
+import { formatOrdinalDate, isSameDay } from "@/lib/date";
+import { joinChallenge, logGoal, type Profile } from "@/lib/profile";
 import { RankBadge } from "./RankBadge";
 
 const fieldClass =
@@ -17,22 +17,28 @@ const actionLabelClass =
   "font-[family-name:var(--font-inter-tight)] text-xs font-semibold tracking-[3px] text-white uppercase";
 
 export function LogGoalModal({
+  challengeId,
   profile,
   youEntry,
   date,
+  alreadyLoggedOnDate,
   onClose,
   onSaved,
 }: {
+  challengeId: string;
   profile: Profile | null;
   youEntry: StatEntry | null;
   date: Date;
+  alreadyLoggedOnDate: boolean;
   onClose: () => void;
-  onSaved: (profile: Profile) => void;
+  onSaved: () => void | Promise<void>;
 }) {
   const [name, setName] = useState("");
   const [goal, setGoal] = useState("");
   const [avatarDataUrl, setAvatarDataUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -57,27 +63,35 @@ export function LogGoalModal({
     reader.readAsDataURL(file);
   }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!name.trim() || !goal.trim()) return;
-    const next: Profile = {
-      name: name.trim(),
-      goal: goal.trim(),
-      avatarDataUrl,
-      loggedDates: [dateKey(date)],
-    };
-    saveProfile(next);
-    onSaved(next);
+    setPending(true);
+    setError(null);
+    try {
+      await joinChallenge({ challengeId, name: name.trim(), goal: goal.trim(), avatarDataUrl });
+      await onSaved();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setPending(false);
+    }
   }
 
-  function handleLogDate() {
+  async function handleLogDate() {
     if (!profile) return;
-    const next = withLoggedDate(profile, date);
-    saveProfile(next);
-    onSaved(next);
+    setPending(true);
+    setError(null);
+    try {
+      await logGoal({ challengeId, userId: profile.id, date });
+      await onSaved();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setPending(false);
+    }
   }
 
-  const alreadyLogged = !!profile && isLoggedOn(profile, date);
   const dateLabel = isSameDay(date, new Date()) ? "today" : formatOrdinalDate(date);
 
   return (
@@ -102,7 +116,7 @@ export function LogGoalModal({
               <div className="flex items-center gap-5">
                 <div className="relative size-11 shrink-0 overflow-hidden rounded-full border border-[#e9eaeb]">
                   <Image
-                    src={profile.avatarDataUrl ?? "/design/avatar.png"}
+                    src={profile.avatarUrl ?? "/design/avatar.png"}
                     alt=""
                     fill
                     sizes="44px"
@@ -121,14 +135,20 @@ export function LogGoalModal({
               {youEntry && <RankBadge variant={youEntry.badge} value={youEntry.value} />}
             </div>
 
+            {error && <p className="w-full text-center text-[13px] text-red-300">{error}</p>}
+
             <button
               type="button"
               onClick={handleLogDate}
-              disabled={alreadyLogged}
-              className={actionButtonClass + (alreadyLogged ? " cursor-default opacity-60 hover:bg-white/10" : "")}
+              disabled={alreadyLoggedOnDate || pending}
+              className={
+                actionButtonClass + (alreadyLoggedOnDate || pending ? " cursor-default opacity-60 hover:bg-white/10" : "")
+              }
             >
               <Image src="/design/check.svg" alt="" width={18} height={13} />
-              <span className={actionLabelClass}>{alreadyLogged ? `Logged for ${dateLabel}` : `Done for ${dateLabel}`}</span>
+              <span className={actionLabelClass}>
+                {alreadyLoggedOnDate ? `Logged for ${dateLabel}` : pending ? "Saving…" : `Done for ${dateLabel}`}
+              </span>
             </button>
           </>
         ) : (
@@ -188,9 +208,11 @@ export function LogGoalModal({
               </div>
             </div>
 
-            <button type="submit" className={actionButtonClass}>
+            {error && <p className="w-full text-center text-[13px] text-red-300">{error}</p>}
+
+            <button type="submit" disabled={pending} className={actionButtonClass + (pending ? " opacity-60" : "")}>
               <Image src="/design/plus.svg" alt="" width={20} height={20} />
-              <span className={actionLabelClass}>Log your goal</span>
+              <span className={actionLabelClass}>{pending ? "Saving…" : "Log your goal"}</span>
             </button>
           </form>
         )}

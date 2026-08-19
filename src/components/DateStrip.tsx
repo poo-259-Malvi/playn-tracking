@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { addDays, dateKey, weekdayShort } from "@/lib/date";
+import { addDays, dateKey, isSameDay, weekdayShort } from "@/lib/date";
 
 function DayCard({ date, active, logged }: { date: Date; active: boolean; logged: boolean }) {
+  const isToday = isSameDay(date, new Date());
+
   return (
     <div
       className={
@@ -16,10 +18,10 @@ function DayCard({ date, active, logged }: { date: Date; active: boolean; logged
       <span
         className={
           "font-[family-name:var(--font-inter-tight)] font-semibold tracking-[3px] whitespace-nowrap text-white uppercase " +
-          (active ? "text-[14px] tracking-[4.5px] sm:text-[18px]" : "text-[10px] sm:text-[12px]")
+          (active && !isToday ? "text-[14px] tracking-[4.5px] sm:text-[18px]" : "text-[10px] sm:text-[12px]")
         }
       >
-        {weekdayShort(date)}
+        {isToday ? "TODAY" : weekdayShort(date)}
       </span>
       <span
         className={
