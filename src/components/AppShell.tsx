@@ -82,6 +82,9 @@ export function AppShell() {
     );
   }
 
+  const today = new Date();
+  const maxSelectableDate = dateKey(challenge.endDate) < dateKey(today) ? challenge.endDate : today;
+
   const myLoggedDateKeys = new Set(
     goalLogs.filter((log) => log.userId === me?.id).map((log) => log.dateKey),
   );
@@ -120,7 +123,7 @@ export function AppShell() {
         onSelectedChange={setSelectedDate}
         isLogged={(date) => myLoggedDateKeys.has(dateKey(date))}
         minDate={challenge.startDate}
-        maxDate={challenge.endDate}
+        maxDate={maxSelectableDate}
       />
 
       <div className="flex w-full flex-col items-center gap-[25px]">
