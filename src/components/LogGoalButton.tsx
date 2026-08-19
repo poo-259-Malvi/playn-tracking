@@ -1,6 +1,12 @@
 import Image from "next/image";
 
-export function LogGoalButton({ onClick }: { onClick?: () => void }) {
+export function LogGoalButton({
+  onClick,
+  hasGoal,
+}: {
+  onClick?: () => void;
+  hasGoal: boolean;
+}) {
   return (
     <button
       type="button"
@@ -9,7 +15,7 @@ export function LogGoalButton({ onClick }: { onClick?: () => void }) {
     >
       <Image src="/design/plus.svg" alt="" width={20} height={20} />
       <span className="font-[family-name:var(--font-inter-tight)] text-xs font-semibold tracking-[3px] text-white uppercase">
-        Log your goal
+        {hasGoal ? "Log your goal" : "Create your goal"}
       </span>
     </button>
   );

@@ -127,7 +127,7 @@ export function AppShell() {
       />
 
       <div className="flex w-full flex-col items-center gap-[25px]">
-        <LogGoalButton onClick={() => setModalOpen(true)} />
+        <LogGoalButton onClick={() => setModalOpen(true)} hasGoal={me !== null} />
 
         <ChallengeProgress
           title={challenge.name}
